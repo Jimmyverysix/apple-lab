@@ -102,7 +102,7 @@ UI 界面设计
 这是一个纯静态项目，您可以直接下载并在本地运行，或者部署到任何静态托管服务。
 
 # 克隆项目
-git clone [https://github.com/你的用户名/你的仓库名.git](https://github.com/你的用户名/你的仓库名.git)
+git clone [https://github.com/Jimmyverysix/apple-lab.git](https://github.com/Jimmyverysix/apple-lab.git)
 
 # 进入目录
 cd 你的仓库名
@@ -124,3 +124,4 @@ cd 你的仓库名
 Made with ❤️ by <a href="https://www.google.com/search?q=https://github.com/%E4%BD%A0%E7%9A%84%E7%94%A8%E6%88%B7%E5%90%8D">JIMMYVERYSIX</a>
 
 </div>
+
