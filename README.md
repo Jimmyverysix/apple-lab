@@ -14,31 +14,28 @@
 解构、切片、基因修改，或是进入“禅意模式”放空心灵。
 </p>
 
-<!-- 徽章区域 -->
-
 <p>
 <!-- Stars 徽章 -->
 <a href="https://www.google.com/search?q=https://github.com/Jimmyverysix/apple-lab/stargazers">
-<img src="https://img.shields.io/github/stars/Jimmyverysix/apple-lab%3Fcolor%3Dyellow%26logo%3Dgithub%26style%3Dflat-square" alt="GitHub Stars">
+<img src="https://www.google.com/search?q=https://img.shields.io/github/stars/Jimmyverysix/apple-lab%3Fcolor%3Dyellow%26logo%3Dgithub%26style%3Dflat-square" alt="GitHub Stars">
 </a>
 <!-- Forks 徽章 -->
 <a href="https://www.google.com/search?q=https://github.com/Jimmyverysix/apple-lab/network/members">
-<img src="https://img.shields.io/github/forks/Jimmyverysix/apple-lab%3Fcolor%3Dorange%26logo%3Dgithub%26style%3Dflat-square" alt="GitHub Forks">
+<img src="https://www.google.com/search?q=https://img.shields.io/github/forks/Jimmyverysix/apple-lab%3Fcolor%3Dorange%26logo%3Dgithub%26style%3Dflat-square" alt="GitHub Forks">
 </a>
 <!-- Issues 徽章 -->
 <a href="https://www.google.com/search?q=https://github.com/Jimmyverysix/apple-lab/issues">
-<img src="https://img.shields.io/github/issues/Jimmyverysix/apple-lab%3Fcolor%3Dred%26logo%3Dgithub%26style%3Dflat-square" alt="Issues">
+<img src="https://www.google.com/search?q=https://img.shields.io/github/issues/Jimmyverysix/apple-lab%3Fcolor%3Dred%26logo%3Dgithub%26style%3Dflat-square" alt="Issues">
 </a>
 <!-- 访客统计徽章 -->
 <a href="https://www.google.com/search?q=https://visitor-badge.laobi.icu/badge%3Fpage_id%3DJimmyverysix.apple-lab">
-<img src="https://visitor-badge.laobi.icu/badge%3Fpage_id%3DJimmyverysix.apple-lab" alt="visitors">
+<img src="https://www.google.com/search?q=https://visitor-badge.laobi.icu/badge%3Fpage_id%3DJimmyverysix.apple-lab" alt="visitors">
 </a>
 <!-- License 徽章 -->
 <a href="https://www.google.com/search?q=LICENSE">
-<img src="https://img.shields.io/github/license/Jimmyverysix/apple-lab%3Fcolor%3Dblue%26style%3Dflat-square" alt="License">
+<img src="https://www.google.com/search?q=https://img.shields.io/github/license/Jimmyverysix/apple-lab%3Fcolor%3Dblue%26style%3Dflat-square" alt="License">
 </a>
 </p>
-
 <!-- 演示按钮 -->
 
 <h3>
@@ -129,6 +126,7 @@ cd 你的仓库名
 Made with ❤️ by <a href="https://www.google.com/search?q=https://github.com/%E4%BD%A0%E7%9A%84%E7%94%A8%E6%88%B7%E5%90%8D">JIMMYVERYSIX</a>
 
 </div>
+
 
 
 
