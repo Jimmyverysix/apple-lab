@@ -87,11 +87,12 @@
 
 本项目使用纯原生技术构建，无需复杂的构建工具，开箱即用。
 
-核心 3D 引擎
-
-UI 界面设计
-
-结构与逻辑
+<div align="center">
+  <img src="https://img.shields.io/badge/WebGL-Native-990000?style=for-the-badge&logo=webgl&logoColor=white" alt="WebGL">
+  <img src="https://img.shields.io/badge/JavaScript-ES6+-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black" alt="JavaScript">
+  <img src="https://img.shields.io/badge/HTML5-Structure-E34F26?style=for-the-badge&logo=html5&logoColor=white" alt="HTML5">
+  <img src="https://img.shields.io/badge/CSS3-Styling-1572B6?style=for-the-badge&logo=css3&logoColor=white" alt="CSS3">
+</div>
 
 🚀 快速开始 (Quick Start)
 
@@ -105,8 +106,13 @@ cd 你的仓库名
 
 # 双击 index.html 即可运行
 
-
 📈 Star 趋势 (Star History)
+
+<div align="center">
+  <a href="https://star-history.com/#Jimmyverysix/apple-lab&Date">
+    <img src="https://api.star-history.com/svg?repos=Jimmyverysix/apple-lab&type=Date" alt="Star History Chart">
+  </a>
+</div>
 
 🤝 贡献 (Contributing)
 
@@ -117,9 +123,10 @@ cd 你的仓库名
 本项目基于 MIT License 开源。
 
 <div align="center">
-Made with ❤️ by <a href="https://www.google.com/search?q=https://github.com/%E4%BD%A0%E7%9A%84%E7%94%A8%E6%88%B7%E5%90%8D">JIMMYVERYSIX</a>
+Made with ❤️ by <a href="https://www.google.com/search?q=https://github.com/Jimmyverysix">JIMMYVERYSIX</a>
 
 </div>
+
 
 
 
