@@ -121,5 +121,6 @@ cd 你的仓库名
 本项目基于 MIT License 开源。
 
 <div align="center">
-Made with ❤️ by <a href="https://www.google.com/search?q=https://github.com/%E4%BD%A0%E7%9A%84%E7%94%A8%E6%88%B7%E5%90%8D">你的名字</a>
+Made with ❤️ by <a href="https://www.google.com/search?q=https://github.com/%E4%BD%A0%E7%9A%84%E7%94%A8%E6%88%B7%E5%90%8D">JIMMYVERYSIX</a>
+
 </div>
