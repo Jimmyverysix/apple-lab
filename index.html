@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>苹果实验室</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #111; font-family: 'Segoe UI', sans-serif; transition: background 0.5s; }
+        canvas { display: block; outline: none; }
+        
+        /* Glassmorphism UI */
+        .glass-panel {
+            background: rgba(20, 20, 30, 0.75);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            color: #e2e8f0;
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #4f46e5; border-radius: 2px; }
+        
+        /* Sliders */
+        input[type=range] {
+            -webkit-appearance: none;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 14px;
+            width: 14px;
+            border-radius: 50%;
+            background: #6366f1;
+            cursor: pointer;
+            margin-top: -5px; 
+            box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #334155;
+            border-radius: 2px;
+        }
+
+        /* 动画类 */
+        .fade-in { animation: fadeIn 0.5s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* 发呆模式样式 */
+        #zen-overlay {
+            background: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.8) 100%);
+            pointer-events: none; /* 让鼠标穿透，仍然可以旋转苹果 */
+        }
+        #zen-ui {
+            pointer-events: auto;
+        }
+        
+        /* 输入框样式 */
+        .zen-input {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            text-align: center;
+            outline: none;
+            transition: all 0.3s;
+        }
+        .zen-input:focus {
+            background: rgba(255,255,255,0.2);
+            border-color: rgba(255,255,255,0.5);
+        }
+    </style>
+    <!-- Three.js Import Map -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+</head>
+<body>
+
+    <!-- 背景容器 -->
+    <div id="bg-layer" class="absolute inset-0 z-0 bg-gradient-to-br from-gray-900 to-black pointer-events-none transition-all duration-700"></div>
+
+    <!-- 主画布 -->
+    <div id="canvas-container" class="w-full h-screen relative cursor-move z-0"></div>
+
+    <!-- 发呆模式遮罩 -->
+    <div id="zen-overlay" class="fixed inset-0 z-30 hidden flex flex-col items-center justify-between py-20 transition-opacity duration-1000 opacity-0">
+        <div class="text-white/50 text-sm tracking-[0.5em] uppercase font-light">Zen Mode</div>
+        <div class="text-center">
+            <div id="zen-timer" class="text-8xl font-thin text-white font-mono tabular-nums shadow-lg drop-shadow-2xl">00:00</div>
+            <p class="text-white/30 text-xs mt-4">保持专注，或是放空心灵</p>
+        </div>
+        
+        <div id="zen-ui" class="flex flex-col items-center">
+            <!-- 停止按钮 -->
+            <button id="stopZenBtn" class="px-8 py-2 border border-white/20 rounded-full text-white/60 hover:text-white hover:bg-white/10 transition backdrop-blur-md">
+                结束发呆
+            </button>
+            
+            <!-- 保存界面 (初始隐藏) -->
+            <div id="zen-save-ui" class="hidden flex flex-col items-center space-y-4 w-64 fade-in">
+                <input type="text" id="zen-name-input" placeholder="给这次发呆起个名字..." maxlength="12" class="zen-input w-full px-4 py-2 rounded-lg backdrop-blur-md placeholder-white/30">
+                <button id="saveZenBtn" class="w-full px-8 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg transition shadow-lg">
+                    保存记录
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 排行榜弹窗 -->
+    <div id="leaderboard-modal" class="fixed inset-0 z-40 hidden flex items-center justify-center bg-black/80 backdrop-blur-sm">
+        <div class="glass-panel w-96 p-6 rounded-2xl transform transition-all scale-100 fade-in">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold text-white flex items-center">
+                    <span class="text-yellow-400 mr-2">🏆</span> 发呆排行榜
+                </h2>
+                <button id="closeLeaderboard" class="text-gray-400 hover:text-white">&times;</button>
+            </div>
+            
+            <div id="current-score-display" class="mb-6 p-4 bg-indigo-500/20 border border-indigo-500/30 rounded-xl text-center hidden">
+                <p class="text-indigo-300 text-xs uppercase tracking-wider mb-1">本次发呆时长</p>
+                <p class="text-3xl font-mono text-white" id="current-time-text">00:00</p>
+            </div>
+
+            <div class="space-y-2 mb-6 max-h-60 overflow-y-auto" id="leaderboard-list">
+                <div class="text-center text-gray-500 text-sm py-4">暂无记录</div>
+            </div>
+
+            <button id="clearStorage" class="w-full py-2 text-xs text-gray-500 hover:text-red-400 transition border-t border-white/10">
+                清除本地记录
+            </button>
+        </div>
+    </div>
+
+    <!-- 主控制面板 -->
+    <div id="main-panel" class="fixed top-4 right-4 w-80 glass-panel rounded-2xl p-5 transition-all duration-500 transform z-20 max-h-[95vh] overflow-y-auto shadow-2xl translate-x-0 opacity-100">
+        <h1 class="text-xl font-bold text-white mb-5 flex items-center justify-between border-b border-white/10 pb-3">
+            <span class="flex items-center"><span class="text-2xl mr-2">🍎</span> 苹果实验室 <span class="text-[10px] ml-2 bg-indigo-600 px-1 rounded text-white">PRO</span></span>
+        </h1>
+
+        <div class="space-y-5">
+            
+            <!-- 发呆入口 -->
+            <div class="bg-indigo-900/20 border border-indigo-500/30 rounded-xl p-3">
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="text-xs font-bold text-indigo-300 uppercase">放空时刻</h3>
+                    <button id="showLeaderboardBtn" class="text-[10px] text-gray-400 hover:text-white underline">查看排行</button>
+                </div>
+                <button id="startZenBtn" class="w-full py-2 bg-indigo-600/80 hover:bg-indigo-500 text-white text-sm rounded-lg transition flex justify-center items-center shadow-lg shadow-indigo-500/20 group">
+                    <span class="mr-2">🧘</span> 进入发呆模式
+                </button>
+            </div>
+
+            <!-- 场景控制 -->
+            <div class="space-y-3">
+                <h3 class="text-[10px] font-bold text-indigo-300 uppercase tracking-widest">环境与模式</h3>
+                <div class="grid grid-cols-2 gap-2">
+                    <button id="bgToggle" class="px-3 py-2 text-xs bg-white/10 hover:bg-white/20 rounded transition text-center">切换背景</button>
+                    <button id="holoToggle" class="px-3 py-2 text-xs bg-cyan-900/50 text-cyan-300 hover:bg-cyan-800/50 rounded transition text-center border border-cyan-500/30">全息模式</button>
+                </div>
+                <div class="flex items-center justify-between bg-black/20 p-2 rounded">
+                    <label class="text-xs text-gray-300">魔法粒子 (Aura)</label>
+                    <input type="checkbox" id="particleToggle" checked class="accent-indigo-500">
+                </div>
+            </div>
+
+            <!-- 结构解构 -->
+            <div class="space-y-3 pt-2 border-t border-white/10">
+                <h3 class="text-[10px] font-bold text-indigo-300 uppercase tracking-widest">结构工程</h3>
+                <div>
+                    <label class="block text-xs font-medium text-gray-400 mb-1 flex justify-between">
+                        <span>爆炸视图 (Explode)</span>
+                        <span class="text-indigo-400">分离组件</span>
+                    </label>
+                    <input type="range" id="explodeSlider" min="0" max="2" step="0.01" value="0" class="w-full">
+                </div>
+                 <div>
+                    <label class="block text-xs font-medium text-gray-400 mb-1 flex justify-between">
+                        <span>切片拉伸 (Slices)</span>
+                        <span class="text-indigo-400">拉开!</span>
+                    </label>
+                    <input type="range" id="sliceExpand" min="0" max="2" step="0.01" value="0" class="w-full accent-pink-500">
+                </div>
+            </div>
+
+            <!-- 外观定制 -->
+            <div class="space-y-3 pt-2 border-t border-white/10">
+                <h3 class="text-[10px] font-bold text-indigo-300 uppercase tracking-widest">基因修改</h3>
+                
+                <div class="flex justify-between items-center">
+                     <input type="color" id="colorPicker" value="#d91e18" class="h-8 w-1/3 rounded cursor-pointer border-0 bg-transparent">
+                     <label class="text-xs text-gray-400 flex items-center"><input type="checkbox" id="rainbowMode" class="mr-1 accent-indigo-500"> 彩虹流光</label>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[10px] text-gray-500 mb-1">高度 (Y)</label>
+                        <input type="range" id="scaleY" min="0.5" max="1.5" step="0.01" value="1" class="w-full">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] text-gray-500 mb-1">胖瘦 (XZ)</label>
+                        <input type="range" id="scaleXZ" min="0.5" max="1.5" step="0.01" value="1" class="w-full">
+                    </div>
+                </div>
+                
+                 <div>
+                    <label class="block text-[10px] text-gray-500 mb-1">生命律动 (Pulse)</label>
+                    <input type="range" id="pulseSpeed" min="0" max="10" step="0.1" value="0" class="w-full">
+                </div>
+            </div>
+
+            <!-- 导出 -->
+            <div class="pt-4 mt-2 border-t border-white/10">
+                <button id="downloadBtn" class="group w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl shadow-lg shadow-indigo-500/30 transform transition font-bold flex justify-center items-center">
+                    <svg class="w-5 h-5 mr-2 group-hover:animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    下载高清 SVG
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        // --- 1. 初始化 ---
+        const container = document.getElementById('canvas-container');
+        const bgLayer = document.getElementById('bg-layer');
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x111111, 0.02);
+
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+        camera.position.set(0, 2, 22);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.0; 
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.SoftShadowMap;
+        container.appendChild(renderer.domElement);
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.autoRotate = true;
+        controls.autoRotateSpeed = 2.0;
+
+        // --- 2. 灯光 ---
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5); 
+        scene.add(ambientLight);
+
+        const mainLight = new THREE.DirectionalLight(0xffffff, 1.8);
+        mainLight.position.set(5, 10, 7);
+        mainLight.castShadow = true;
+        mainLight.shadow.mapSize.width = 2048;
+        mainLight.shadow.mapSize.height = 2048;
+        mainLight.shadow.bias = -0.0001;
+        scene.add(mainLight);
+
+        const fillLight = new THREE.PointLight(0x6366f1, 0.8, 20); 
+        fillLight.position.set(-5, 2, -5);
+        scene.add(fillLight);
+
+        const rimLight = new THREE.SpotLight(0xffffff, 2);
+        rimLight.position.set(0, 8, -8);
+        scene.add(rimLight);
+
+        // --- 3. 核心构建 ---
+        const appleRoot = new THREE.Group();
+        scene.add(appleRoot);
+
+        // 辅助函数：苹果轮廓公式
+        function getAppleRadius(t) {
+            let x = Math.sin(t * Math.PI) * 3.5 + Math.sin(t * Math.PI * 2) * 0.25;
+            if (t < 0.1) x *= t * 8; 
+            if (t > 0.92) x *= (1 - t) * 12; 
+            return x;
+        }
+        function getAppleY(t) {
+            return Math.cos(t * Math.PI) * 3.2;
+        }
+
+        // 3.1 苹果完整主体 (Whole Apple)
+        const wholePoints = [];
+        for (let i = 0; i <= 40; i++) { 
+            const t = i / 40;
+            wholePoints.push(new THREE.Vector2(getAppleRadius(t), getAppleY(t)));
+        }
+        const wholeGeo = new THREE.LatheGeometry(wholePoints, 64);
+        const skinMat = new THREE.MeshPhysicalMaterial({
+            color: 0xd91e18, 
+            roughness: 0.4, 
+            metalness: 0.1, 
+            clearcoat: 0.3, 
+            clearcoatRoughness: 0.25, 
+            side: THREE.DoubleSide
+        });
+        const fleshMat = new THREE.MeshStandardMaterial({
+            color: 0xfffee0, roughness: 0.8, side: THREE.DoubleSide
+        });
+
+        const wholeAppleMesh = new THREE.Mesh(wholeGeo, skinMat);
+        wholeAppleMesh.castShadow = true;
+        wholeAppleMesh.receiveShadow = true;
+        appleRoot.add(wholeAppleMesh);
+
+        // 3.2 苹果切片组 (Slices Group)
+        const slicesGroup = new THREE.Group();
+        appleRoot.add(slicesGroup);
+        slicesGroup.visible = false;
+
+        const numSlices = 12;
+        const slices = [];
+        
+        // 生成切片
+        for (let i = 0; i < numSlices; i++) {
+            const tStart = i / numSlices;
+            const tEnd = (i + 0.95) / numSlices; 
+            
+            // 生成切片的 Lathe 轮廓
+            const slicePoints = [];
+            slicePoints.push(new THREE.Vector2(0, getAppleY(tStart)));
+            slicePoints.push(new THREE.Vector2(getAppleRadius(tStart), getAppleY(tStart)));
+            
+            const subSteps = 5;
+            for(let j=0; j<=subSteps; j++) {
+                const t = tStart + (tEnd - tStart) * (j/subSteps);
+                slicePoints.push(new THREE.Vector2(getAppleRadius(t), getAppleY(t)));
+            }
+
+            slicePoints.push(new THREE.Vector2(getAppleRadius(tEnd), getAppleY(tEnd)));
+            slicePoints.push(new THREE.Vector2(0, getAppleY(tEnd)));
+
+            const sliceGeo = new THREE.LatheGeometry(slicePoints, 48);
+            
+            const sliceContainer = new THREE.Group();
+            
+            const fleshMeshSlice = new THREE.Mesh(sliceGeo, fleshMat);
+            fleshMeshSlice.castShadow = true;
+            fleshMeshSlice.receiveShadow = true;
+            sliceContainer.add(fleshMeshSlice);
+
+            const skinPoints = [];
+            for(let j=0; j<=subSteps; j++) {
+                const t = tStart + (tEnd - tStart) * (j/subSteps);
+                skinPoints.push(new THREE.Vector2(getAppleRadius(t), getAppleY(t)));
+            }
+            const skinGeo = new THREE.LatheGeometry(skinPoints, 48);
+            const skinMeshSlice = new THREE.Mesh(skinGeo, skinMat);
+            skinMeshSlice.scale.set(1.005, 1, 1.005); 
+            skinMeshSlice.castShadow = true;
+            sliceContainer.add(skinMeshSlice);
+
+            sliceContainer.userData = {
+                originalY: 0, 
+                index: i
+            };
+
+            slicesGroup.add(sliceContainer);
+            slices.push(sliceContainer);
+        }
+
+        // 3.3 自然叶子 (Leaf 2.0)
+        const leafGeo = new THREE.PlaneGeometry(2.2, 3.2, 12, 16); 
+        const posAttribute = leafGeo.attributes.position;
+        const vertex = new THREE.Vector3();
+        
+        for (let i = 0; i < posAttribute.count; i++) {
+            vertex.fromBufferAttribute(posAttribute, i);
+            
+            const u = (vertex.x + 1.1) / 2.2; 
+            const v = (vertex.y + 1.6) / 3.2; 
+
+            const widthScale = Math.sin(v * Math.PI); 
+            vertex.x *= widthScale * 0.8; 
+
+            const spineCurl = Math.pow(Math.abs(vertex.x), 2) * 0.8; 
+            vertex.z += spineCurl;
+            
+            const tipCurl = v * v * 0.8;
+            vertex.z -= tipCurl;
+
+            const edgeFactor = Math.abs(vertex.x) / 0.8; 
+            const noise = (Math.random() - 0.5) * 0.15 * edgeFactor;
+            vertex.z += noise;
+            vertex.y += noise * 0.5;
+
+            if (Math.abs(vertex.x) < 0.1) {
+                vertex.z -= 0.05;
+            }
+
+            posAttribute.setXYZ(i, vertex.x, vertex.y + 1.6, vertex.z);
+        }
+        leafGeo.computeVertexNormals();
+
+        const leafMat = new THREE.MeshStandardMaterial({ 
+            color: 0x558b2f, 
+            roughness: 0.65, 
+            metalness: 0.0, 
+            side: THREE.DoubleSide
+        });
+        const leafMesh = new THREE.Mesh(leafGeo, leafMat);
+        
+        // 重新定位与旋转
+        leafMesh.position.set(0.25, 3.6, 0); 
+        leafMesh.rotation.set(1.0, 0.5, -0.5);
+        leafMesh.scale.set(0.9, 0.9, 0.9);
+        leafMesh.castShadow = true;
+        appleRoot.add(leafMesh);
+
+        // 3.4 果梗 (Stem)
+        const stemCurve = new THREE.CatmullRomCurve3([
+            new THREE.Vector3(0, 2.9, 0), 
+            new THREE.Vector3(0.15, 3.7, 0),
+            new THREE.Vector3(0.5, 4.3, 0)
+        ]);
+        const stemGeo = new THREE.TubeGeometry(stemCurve, 16, 0.12, 8, false);
+        const stemMat = new THREE.MeshStandardMaterial({ color: 0x4a3b2a, roughness: 0.9 });
+        const stemMesh = new THREE.Mesh(stemGeo, stemMat);
+        stemMesh.castShadow = true;
+        appleRoot.add(stemMesh);
+
+        // --- 4. 粒子系统 ---
+        const particleCount = 150;
+        const particlesGeo = new THREE.BufferGeometry();
+        const particlePositions = new Float32Array(particleCount * 3);
+        for(let i=0; i<particleCount; i++) {
+            const r = 5 + Math.random() * 5; 
+            const theta = Math.random() * Math.PI * 2;
+            const phi = Math.acos(2 * Math.random() - 1);
+            particlePositions[i*3] = r * Math.sin(phi) * Math.cos(theta);
+            particlePositions[i*3+1] = r * Math.sin(phi) * Math.sin(theta);
+            particlePositions[i*3+2] = r * Math.cos(phi);
+        }
+        particlesGeo.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
+        const particlesMat = new THREE.PointsMaterial({
+            color: 0xffffff, size: 0.15, transparent: true, opacity: 0.6,
+            blending: THREE.AdditiveBlending
+        });
+        const particleSystem = new THREE.Points(particlesGeo, particlesMat);
+        scene.add(particleSystem);
+
+
+        // --- 5. 状态与交互 ---
+        const state = {
+            isHolo: false,
+            bgIndex: 0,
+            baseColor: new THREE.Color(0xd91e18),
+            time: 0,
+            zenStartTime: 0,
+            zenInterval: null,
+            zenDuration: 0 // 暂存发呆时长
+        };
+
+        const ui = {
+            mainPanel: document.getElementById('main-panel'),
+            zenOverlay: document.getElementById('zen-overlay'),
+            zenTimer: document.getElementById('zen-timer'),
+            zenUi: document.getElementById('zen-ui'),
+            startZen: document.getElementById('startZenBtn'),
+            stopZen: document.getElementById('stopZenBtn'),
+            
+            // 新增保存相关
+            zenSaveUi: document.getElementById('zen-save-ui'),
+            zenNameInput: document.getElementById('zen-name-input'),
+            saveZen: document.getElementById('saveZenBtn'),
+
+            leaderboardModal: document.getElementById('leaderboard-modal'),
+            leaderboardList: document.getElementById('leaderboard-list'),
+            closeLeaderboard: document.getElementById('closeLeaderboard'),
+            showLeaderboard: document.getElementById('showLeaderboardBtn'),
+            currentTimeDisplay: document.getElementById('current-score-display'),
+            currentTimeText: document.getElementById('current-time-text'),
+            clearStorage: document.getElementById('clearStorage'),
+            
+            explode: document.getElementById('explodeSlider'),
+            sliceExpand: document.getElementById('sliceExpand'), 
+            particle: document.getElementById('particleToggle'),
+            holo: document.getElementById('holoToggle'),
+            bg: document.getElementById('bgToggle'),
+            color: document.getElementById('colorPicker'),
+            rainbow: document.getElementById('rainbowMode'),
+            scaleY: document.getElementById('scaleY'),
+            scaleXZ: document.getElementById('scaleXZ'),
+            pulse: document.getElementById('pulseSpeed'),
+            dl: document.getElementById('downloadBtn')
+        };
+
+        // --- 核心交互逻辑 (Unified Update) ---
+
+        // 统一更新函数：处理所有位置变化
+        function updateAppleStructure() {
+            const explodeVal = parseFloat(ui.explode.value);
+            const sliceGap = parseFloat(ui.sliceExpand.value);
+            
+            // 1. 处理切片位置
+            if (sliceGap > 0.05) {
+                wholeAppleMesh.visible = false;
+                slicesGroup.visible = true;
+                slices.forEach(slice => {
+                    const idx = slice.userData.index;
+                    const offset = (numSlices/2 - idx) * sliceGap;
+                    slice.position.y = offset;
+                });
+            } else {
+                wholeAppleMesh.visible = true;
+                slicesGroup.visible = false;
+            }
+
+            // 2. 计算顶部的切片偏移量 (用于叶子和梗)
+            let topSliceOffset = 0;
+            if (sliceGap > 0.05) {
+                topSliceOffset = (numSlices / 2) * sliceGap;
+            }
+
+            // 3. 更新果梗
+            stemMesh.position.y = (explodeVal * 1.5) + topSliceOffset;
+
+            // 4. 更新叶子
+            leafMesh.position.y = 3.6 + (explodeVal * 2.0) + topSliceOffset;
+            leafMesh.position.x = 0.25 + explodeVal * 0.5; 
+            leafMesh.rotation.z = -0.5 + explodeVal * 0.2; 
+        }
+
+        ui.explode.addEventListener('input', updateAppleStructure);
+        ui.sliceExpand.addEventListener('input', updateAppleStructure);
+
+        // C. 发呆模式 (Zen Mode)
+        function formatTime(ms) {
+            const totalSeconds = Math.floor(ms / 1000);
+            const m = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+            const s = (totalSeconds % 60).toString().padStart(2, '0');
+            return `${m}:${s}`;
+        }
+
+        ui.startZen.addEventListener('click', () => {
+            ui.mainPanel.classList.add('translate-x-full', 'opacity-0'); 
+            ui.zenOverlay.classList.remove('hidden');
+            setTimeout(() => ui.zenOverlay.classList.remove('opacity-0'), 100); 
+
+            // 重置 UI 状态
+            ui.stopZen.classList.remove('hidden');
+            ui.zenSaveUi.classList.add('hidden');
+            ui.zenNameInput.value = '';
+
+            state.zenStartTime = Date.now();
+            ui.zenTimer.innerText = "00:00";
+            state.zenInterval = setInterval(() => {
+                const elapsed = Date.now() - state.zenStartTime;
+                ui.zenTimer.innerText = formatTime(elapsed);
+            }, 1000);
+
+            controls.autoRotateSpeed = 0.5; 
+            if(state.bgIndex !== 0) { 
+                 bgLayer.className = `absolute inset-0 z-0 pointer-events-none transition-all duration-700 bg-gradient-to-br from-gray-900 to-black`;
+            }
+        });
+
+        // 停止发呆 -> 显示保存界面
+        ui.stopZen.addEventListener('click', () => {
+            clearInterval(state.zenInterval);
+            state.zenDuration = Date.now() - state.zenStartTime;
+            
+            // 切换到保存界面
+            ui.stopZen.classList.add('hidden');
+            ui.zenSaveUi.classList.remove('hidden');
+            ui.zenNameInput.focus();
+        });
+
+        // 确认保存
+        ui.saveZen.addEventListener('click', () => {
+            const name = ui.zenNameInput.value.trim() || getDefaultName();
+            completeZenSession(name);
+        });
+
+        // 辅助：获取默认名字 (日期时间)
+        function getDefaultName() {
+            const now = new Date();
+            const m = (now.getMonth() + 1).toString();
+            const d = now.getDate().toString();
+            const hh = now.getHours().toString().padStart(2, '0');
+            const mm = now.getMinutes().toString().padStart(2, '0');
+            return `${m}月${d}日 ${hh}:${mm}`;
+        }
+
+        // 完成会话并退出
+        function completeZenSession(sessionName) {
+            // 恢复 UI
+            ui.zenOverlay.classList.add('opacity-0');
+            setTimeout(() => ui.zenOverlay.classList.add('hidden'), 500);
+            ui.mainPanel.classList.remove('translate-x-full', 'opacity-0');
+
+            // 恢复环境
+            controls.autoRotateSpeed = 2.0;
+            if(state.bgIndex !== 0) { 
+                const bgs = [
+                    'bg-gradient-to-br from-gray-900 to-black',
+                    'bg-[url("https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80")] bg-cover bg-center',
+                    'bg-gray-100'
+                ];
+                bgLayer.className = `absolute inset-0 z-0 pointer-events-none transition-all duration-700 ${bgs[state.bgIndex]}`;
+            }
+
+            saveRecord(state.zenDuration, sessionName);
+            showLeaderboard(state.zenDuration);
+        }
+
+        // D. 排行榜 (LocalStorage)
+        function saveRecord(durationMs, name) {
+            if (durationMs < 2000) return; 
+            const records = JSON.parse(localStorage.getItem('apple_zen_records') || '[]');
+            records.push({
+                name: name,
+                date: new Date().toLocaleDateString(),
+                time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+                duration: durationMs
+            });
+            records.sort((a, b) => b.duration - a.duration);
+            const top10 = records.slice(0, 10);
+            localStorage.setItem('apple_zen_records', JSON.stringify(top10));
+        }
+
+        function showLeaderboard(currentDuration = null) {
+            const records = JSON.parse(localStorage.getItem('apple_zen_records') || '[]');
+            ui.leaderboardList.innerHTML = '';
+
+            if (currentDuration) {
+                ui.currentTimeDisplay.classList.remove('hidden');
+                ui.currentTimeText.innerText = formatTime(currentDuration);
+            } else {
+                ui.currentTimeDisplay.classList.add('hidden');
+            }
+
+            if (records.length === 0) {
+                ui.leaderboardList.innerHTML = '<div class="text-center text-gray-500 text-sm py-4">暂无记录，快去发呆吧！</div>';
+            } else {
+                records.forEach((rec, index) => {
+                    const isTop3 = index < 3;
+                    const icon = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${index+1}`;
+                    const colorClass = isTop3 ? 'text-white font-bold' : 'text-gray-400';
+                    // 显示名字，如果没有名字则兼容旧数据
+                    const displayName = rec.name || `${rec.date} ${rec.time}`;
+                    
+                    const row = `
+                        <div class="flex justify-between items-center p-3 bg-white/5 rounded-lg border border-white/5 hover:bg-white/10 transition">
+                            <div class="flex items-center w-full">
+                                <span class="w-8 ${index < 3 ? 'text-xl' : 'text-sm text-gray-500'} flex-shrink-0">${icon}</span>
+                                <div class="flex flex-col flex-grow min-w-0 mr-2">
+                                    <span class="text-gray-200 text-sm truncate font-medium">${displayName}</span>
+                                    <span class="text-[10px] text-gray-500">${rec.date}</span>
+                                </div>
+                                <span class="${colorClass} text-sm font-mono flex-shrink-0">${formatTime(rec.duration)}</span>
+                            </div>
+                        </div>
+                    `;
+                    ui.leaderboardList.innerHTML += row;
+                });
+            }
+            
+            ui.leaderboardModal.classList.remove('hidden');
+        }
+
+        ui.closeLeaderboard.addEventListener('click', () => ui.leaderboardModal.classList.add('hidden'));
+        ui.showLeaderboard.addEventListener('click', () => showLeaderboard(null));
+        
+        //清除存储：移除 confirm，使用点击变色确认逻辑
+        let clearConfirmTimer = null;
+        ui.clearStorage.addEventListener('click', () => {
+            if (ui.clearStorage.classList.contains('text-red-500')) {
+                // 已确认状态，执行删除
+                localStorage.removeItem('apple_zen_records');
+                showLeaderboard(null);
+                // 复原按钮
+                ui.clearStorage.innerText = "清除本地记录";
+                ui.clearStorage.classList.remove('text-red-500', 'font-bold');
+            } else {
+                // 第一次点击，进入确认状态
+                ui.clearStorage.innerText = "再次点击确认清除";
+                ui.clearStorage.classList.add('text-red-500', 'font-bold');
+                
+                // 3秒后自动复原
+                clearTimeout(clearConfirmTimer);
+                clearConfirmTimer = setTimeout(() => {
+                    ui.clearStorage.innerText = "清除本地记录";
+                    ui.clearStorage.classList.remove('text-red-500', 'font-bold');
+                }, 3000);
+            }
+        });
+
+        // E. 全息与材质切换
+        const holoMat = new THREE.MeshBasicMaterial({ 
+            color: 0x00ffff, wireframe: true, transparent: true, opacity: 0.3 
+        });
+        
+        ui.holo.addEventListener('click', () => {
+            state.isHolo = !state.isHolo;
+            const targetMat = state.isHolo ? holoMat : null;
+
+            if (state.isHolo) {
+                wholeAppleMesh.material = holoMat;
+                leafMesh.material = holoMat;
+                stemMesh.material = holoMat;
+                
+                // 处理切片材质
+                slices.forEach(s => {
+                    s.children.forEach(m => m.material = holoMat);
+                });
+
+                ui.holo.classList.add('bg-cyan-600', 'text-white');
+            } else {
+                wholeAppleMesh.material = skinMat;
+                leafMesh.material = leafMat;
+                stemMesh.material = stemMat;
+                
+                // 恢复切片材质 (0是肉, 1是皮)
+                slices.forEach(s => {
+                    s.children[0].material = fleshMat;
+                    s.children[1].material = skinMat;
+                });
+
+                ui.holo.classList.remove('bg-cyan-600', 'text-white');
+            }
+        });
+
+        const bgs = [
+            'bg-gradient-to-br from-gray-900 to-black', 
+            'bg-[url("https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80")] bg-cover bg-center',
+            'bg-gray-100'
+        ];
+        
+        ui.bg.addEventListener('click', () => {
+            state.bgIndex = (state.bgIndex + 1) % bgs.length;
+            bgLayer.className = `absolute inset-0 z-0 pointer-events-none transition-all duration-700 ${bgs[state.bgIndex]}`;
+            
+            if(state.bgIndex === 2) {
+                scene.fog.color.set(0xeeeeee);
+                ambientLight.intensity = 0.8;
+                ui.holo.style.borderColor = "#999";
+                ui.holo.style.color = "#333";
+            } else {
+                scene.fog.color.set(0x111111);
+                ambientLight.intensity = 0.5;
+                ui.holo.style.borderColor = "rgba(6,182,212,0.3)";
+                ui.holo.style.color = "rgb(103,232,249)";
+            }
+        });
+
+        ui.color.addEventListener('input', (e) => {
+            state.baseColor.set(e.target.value);
+            if(!ui.rainbow.checked && !state.isHolo) {
+                skinMat.color.copy(state.baseColor);
+            }
+        });
+
+        ui.scaleY.addEventListener('input', (e) => appleRoot.scale.y = parseFloat(e.target.value));
+        ui.scaleXZ.addEventListener('input', (e) => {
+            const v = parseFloat(e.target.value);
+            appleRoot.scale.x = v;
+            appleRoot.scale.z = v;
+        });
+
+        // F. 动画与渲染
+        const clock = new THREE.Clock();
+        
+        function animate() {
+            requestAnimationFrame(animate);
+            const delta = clock.getDelta();
+            state.time += delta;
+            
+            controls.update();
+
+            // 粒子
+            if (ui.particle.checked && !state.isHolo) {
+                particleSystem.visible = true;
+                particleSystem.rotation.y += 0.002;
+                const positions = particleSystem.geometry.attributes.position.array;
+                for(let i=0; i<particleCount; i++) {
+                    positions[i*3+1] += Math.sin(state.time * 2 + i) * 0.002;
+                }
+                particleSystem.geometry.attributes.position.needsUpdate = true;
+            } else {
+                particleSystem.visible = false;
+            }
+
+            // 心跳
+            const pulseSpeed = parseFloat(ui.pulse.value);
+            if (pulseSpeed > 0) {
+                const scaleBase = parseFloat(ui.scaleXZ.value);
+                const pulse = 1 + Math.sin(state.time * (3 + pulseSpeed)) * 0.03 * (pulseSpeed/5); 
+                appleRoot.scale.x = scaleBase * pulse;
+                appleRoot.scale.z = scaleBase * pulse;
+            }
+
+            // 彩虹
+            if (ui.rainbow.checked && !state.isHolo) {
+                const hue = (state.time * 0.1) % 1; 
+                skinMat.color.setHSL(hue, 0.9, 0.5);
+                ui.color.value = '#' + skinMat.color.getHexString();
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        // G. 导出 SVG
+        ui.dl.addEventListener('click', () => {
+            controls.autoRotate = false;
+            const wasParticle = particleSystem.visible;
+            particleSystem.visible = false;
+            renderer.render(scene, camera);
+            const w = renderer.domElement.width;
+            const h = renderer.domElement.height;
+            const imgData = renderer.domElement.toDataURL("image/png");
+            
+            const svgString = `
+<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
+    <foreignObject width="100%" height="100%">
+        <div xmlns="http://www.w3.org/1999/xhtml">
+            <style>img { width: 100%; height: 100%; object-fit: contain; }</style>
+        </div>
+    </foreignObject>
+    <image href="${imgData}" width="${w}" height="${h}" />
+</svg>`;
+            const blob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `ultimate-apple-${Date.now()}.svg`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            controls.autoRotate = true;
+            particleSystem.visible = wasParticle;
+        });
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        animate();
+    </script>
+</body>
+</html>
