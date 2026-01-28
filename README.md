@@ -17,13 +17,13 @@
 <!-- 徽章区域 -->
 
 <p>
-<a href="https://www.google.com/search?q=https://github.com/%E4%BD%A0%E7%9A%84%E7%94%A8%E6%88%B7%E5%90%8D/%E4%BD%A0%E7%9A%84%E4%BB%93%E5%BA%93%E5%90%8D/stargazers">
+<a href="https://www.google.com/search?q=https://github.com/Jimmyverysix/apple-lab/stargazers">
 <img src="https://www.google.com/search?q=https://img.shields.io/github/stars/%E4%BD%A0%E7%9A%84%E7%94%A8%E6%88%B7%E5%90%8D/%E4%BD%A0%E7%9A%84%E4%BB%93%E5%BA%93%E5%90%8D%3Fcolor%3Dyellow%26logo%3Dgithub%26style%3Dflat-square" alt="GitHub Stars">
 </a>
-<a href="https://www.google.com/search?q=https://github.com/%E4%BD%A0%E7%9A%84%E7%94%A8%E6%88%B7%E5%90%8D/%E4%BD%A0%E7%9A%84%E4%BB%93%E5%BA%93%E5%90%8D/network/members">
+<a href="https://www.google.com/search?q=https://github.com/Jimmyverysix/apple-lab/network/members">
 <img src="https://www.google.com/search?q=https://img.shields.io/github/forks/%E4%BD%A0%E7%9A%84%E7%94%A8%E6%88%B7%E5%90%8D/%E4%BD%A0%E7%9A%84%E4%BB%93%E5%BA%93%E5%90%8D%3Fcolor%3Dorange%26logo%3Dgithub%26style%3Dflat-square" alt="GitHub Forks">
 </a>
-<a href="https://www.google.com/search?q=https://github.com/%E4%BD%A0%E7%9A%84%E7%94%A8%E6%88%B7%E5%90%8D/%E4%BD%A0%E7%9A%84%E4%BB%93%E5%BA%93%E5%90%8D/issues">
+<a href="https://www.google.com/search?q=https://github.com/Jimmyverysix/apple-lab/issues">
 <img src="https://www.google.com/search?q=https://img.shields.io/github/issues/%E4%BD%A0%E7%9A%84%E7%94%A8%E6%88%B7%E5%90%8D/%E4%BD%A0%E7%9A%84%E4%BB%93%E5%BA%93%E5%90%8D%3Fcolor%3Dred%26logo%3Dgithub%26style%3Dflat-square" alt="Issues">
 </a>
 <a href="https://www.google.com/search?q=https://visitor-badge.laobi.icu/badge%3Fpage_id%3D%E4%BD%A0%E7%9A%84%E7%94%A8%E6%88%B7%E5%90%8D.%E4%BD%A0%E7%9A%84%E4%BB%93%E5%BA%93%E5%90%8D">
@@ -124,5 +124,6 @@ cd 你的仓库名
 Made with ❤️ by <a href="https://www.google.com/search?q=https://github.com/%E4%BD%A0%E7%9A%84%E7%94%A8%E6%88%B7%E5%90%8D">JIMMYVERYSIX</a>
 
 </div>
+
 
 
