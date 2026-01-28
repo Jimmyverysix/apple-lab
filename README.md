@@ -3,7 +3,7 @@
 
 
 
- Apple Laboratory PRO</h1>
+ Apple Laboratory</h1>
 
 <p>
 一个基于 WebGL 的沉浸式 3D 互动体验项目。
@@ -17,20 +17,25 @@
 <!-- 徽章区域 -->
 
 <p>
+<!-- Stars 徽章 -->
 <a href="https://www.google.com/search?q=https://github.com/Jimmyverysix/apple-lab/stargazers">
-<img src="https://www.google.com/search?q=https://img.shields.io/github/stars/%E4%BD%A0%E7%9A%84%E7%94%A8%E6%88%B7%E5%90%8D/%E4%BD%A0%E7%9A%84%E4%BB%93%E5%BA%93%E5%90%8D%3Fcolor%3Dyellow%26logo%3Dgithub%26style%3Dflat-square" alt="GitHub Stars">
+<img src="https://www.google.com/search?q=https://img.shields.io/github/stars/Jimmyverysix/apple-lab%3Fcolor%3Dyellow%26logo%3Dgithub%26style%3Dflat-square" alt="GitHub Stars">
 </a>
+<!-- Forks 徽章 -->
 <a href="https://www.google.com/search?q=https://github.com/Jimmyverysix/apple-lab/network/members">
-<img src="https://www.google.com/search?q=https://img.shields.io/github/forks/%E4%BD%A0%E7%9A%84%E7%94%A8%E6%88%B7%E5%90%8D/%E4%BD%A0%E7%9A%84%E4%BB%93%E5%BA%93%E5%90%8D%3Fcolor%3Dorange%26logo%3Dgithub%26style%3Dflat-square" alt="GitHub Forks">
+<img src="https://www.google.com/search?q=https://img.shields.io/github/forks/Jimmyverysix/apple-lab%3Fcolor%3Dorange%26logo%3Dgithub%26style%3Dflat-square" alt="GitHub Forks">
 </a>
+<!-- Issues 徽章 -->
 <a href="https://www.google.com/search?q=https://github.com/Jimmyverysix/apple-lab/issues">
-<img src="https://www.google.com/search?q=https://img.shields.io/github/issues/%E4%BD%A0%E7%9A%84%E7%94%A8%E6%88%B7%E5%90%8D/%E4%BD%A0%E7%9A%84%E4%BB%93%E5%BA%93%E5%90%8D%3Fcolor%3Dred%26logo%3Dgithub%26style%3Dflat-square" alt="Issues">
+<img src="https://www.google.com/search?q=https://img.shields.io/github/issues/Jimmyverysix/apple-lab%3Fcolor%3Dred%26logo%3Dgithub%26style%3Dflat-square" alt="Issues">
 </a>
-<a href="https://www.google.com/search?q=https://visitor-badge.laobi.icu/badge%3Fpage_id%3D%E4%BD%A0%E7%9A%84%E7%94%A8%E6%88%B7%E5%90%8D.%E4%BD%A0%E7%9A%84%E4%BB%93%E5%BA%93%E5%90%8D">
-<img src="https://www.google.com/search?q=https://visitor-badge.laobi.icu/badge%3Fpage_id%3D%E4%BD%A0%E7%9A%84%E7%94%A8%E6%88%B7%E5%90%8D.%E4%BD%A0%E7%9A%84%E4%BB%93%E5%BA%93%E5%90%8D" alt="visitors">
+<!-- 访客统计徽章 -->
+<a href="https://www.google.com/search?q=https://visitor-badge.laobi.icu/badge%3Fpage_id%3DJimmyverysix.apple-lab">
+<img src="https://www.google.com/search?q=https://visitor-badge.laobi.icu/badge%3Fpage_id%3DJimmyverysix.apple-lab" alt="visitors">
 </a>
+<!-- License 徽章 -->
 <a href="https://www.google.com/search?q=LICENSE">
-<img src="https://www.google.com/search?q=https://img.shields.io/github/license/%E4%BD%A0%E7%9A%84%E7%94%A8%E6%88%B7%E5%90%8D/%E4%BD%A0%E7%9A%84%E4%BB%93%E5%BA%93%E5%90%8D%3Fcolor%3Dblue%26style%3Dflat-square" alt="License">
+<img src="https://www.google.com/search?q=https://img.shields.io/github/license/Jimmyverysix/apple-lab%3Fcolor%3Dblue%26style%3Dflat-square" alt="License">
 </a>
 </p>
 
@@ -124,6 +129,7 @@ cd 你的仓库名
 Made with ❤️ by <a href="https://www.google.com/search?q=https://github.com/%E4%BD%A0%E7%9A%84%E7%94%A8%E6%88%B7%E5%90%8D">JIMMYVERYSIX</a>
 
 </div>
+
 
 
 
