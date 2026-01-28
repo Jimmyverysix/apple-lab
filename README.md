@@ -37,7 +37,7 @@
 <!-- 演示按钮 -->
 
 <h3>
-<a href="https://www.google.com/search?q=https://%E4%BD%A0%E7%9A%84%E7%94%A8%E6%88%B7%E5%90%8D.github.io/%E4%BD%A0%E7%9A%84%E4%BB%93%E5%BA%93%E5%90%8D/">🚀 点击进入实验室 (Live Demo)</a>
+<a href="https://jimmyverysix.github.io/apple-lab/">🚀 点击进入实验室 (Live Demo)</a>
 </h3>
 
 
@@ -124,4 +124,5 @@ cd 你的仓库名
 Made with ❤️ by <a href="https://www.google.com/search?q=https://github.com/%E4%BD%A0%E7%9A%84%E7%94%A8%E6%88%B7%E5%90%8D">JIMMYVERYSIX</a>
 
 </div>
+
 
